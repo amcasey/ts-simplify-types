@@ -1,0 +1,33 @@
+{
+  "name": "ts-simplify-types",
+  "version": "0.1.0",
+  "description": "Simplify type dumps produced by tsc --generateTrace",
+  "main": "index.js",
+  "bin": {
+    "ts-simplify-types": "./bin/ts-simplify-types"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/amcasey/ts-simplify-types.git"
+  },
+  "author": "Andrew Casey",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/amcasey/ts-simplify-types/issues"
+  },
+  "homepage": "https://github.com/amcasey/ts-simplify-types#readme",
+  "devDependencies": {
+    "@types/node": "^14.14.31",
+    "@types/split2": "^2.1.6",
+    "@types/yargs": "^16.0.0",
+    "typescript": "^4.2.2"
+  },
+  "dependencies": {
+    "jsonstream-next": "^3.0.0",
+    "split2": "^3.2.2",
+    "yargs": "^16.2.0"
+  }
+}
