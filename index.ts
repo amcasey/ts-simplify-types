@@ -323,15 +323,6 @@ function processTypeHelper(type: any): any {
         };
     }
 
-    if (flags.includes("Object")) {
-        if (type.name) {
-            return {
-                kind: "Unique",
-                ...type,
-            };
-        }
-    }
-
     if (type.name === "__type") {
         return {
             kind: "AnonymousType",
@@ -348,6 +339,16 @@ function processTypeHelper(type: any): any {
             display: type.location ? undefined : display,
             name: undefined,
         };
+    }
+
+    // This is less specific than the name checks
+    if (flags.includes("Object")) {
+        if (type.name) {
+            return {
+                kind: "Object",
+                ...type,
+            };
+        }
     }
 
     // This goes at the end because it's a guess and depends on other interpretations having been checked previously
