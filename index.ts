@@ -147,6 +147,7 @@ function processType(type: any): readonly {}[] {
         id: processed.id,
         kind: processed.kind,
         name: processed.name,
+        aliasTypeArguments: processed.aliasTypeArguments,
         instantiatedType: processed.instantiatedType,
         typeArguments: processed.typeArguments,
     };
@@ -178,9 +179,6 @@ function processTypeHelper(type: any): any {
         char: node.start?.character,
     };
 
-    type.typeArguments = type.typeArguments ?? type.aliasTypeArguments;
-    type.aliasTypeArguments = undefined;
-
     const flags = type.flags;
     type.flags = undefined;
 
@@ -200,7 +198,7 @@ function processTypeHelper(type: any): any {
 
     if (type.unionTypes) {
         return {
-            kind: "Union",
+            kind: makeAliasedKindIfNamed(type, "Union"),
             count: type.unionTypes.length,
             types: type.unionTypes,
             ...type,
@@ -210,7 +208,7 @@ function processTypeHelper(type: any): any {
 
     if (type.intersectionTypes) {
         return {
-            kind: "Intersection",
+            kind: makeAliasedKindIfNamed(type, "Intersection"),
             count: type.intersectionTypes.length,
             types: type.intersectionTypes,
             ...type,
@@ -220,36 +218,29 @@ function processTypeHelper(type: any): any {
 
     if (type.indexedAccessObjectType) {
         return {
-            kind: "IndexedAccess",
+            kind: makeAliasedKindIfNamed(type, "IndexedAccess"),
             ...type,
         };
     }
 
     if (type.keyofType) {
         return {
-            kind: "IndexType",
+            kind: makeAliasedKindIfNamed(type, "IndexType"),
             ...type,
         };
     }
 
     if (type.isTuple) {
         return {
-            kind: "Tuple",
+            kind: makeAliasedKindIfNamed(type, "Tuple"),
             ...type,
             isTuple: undefined,
         };
     }
 
-    if (type.instantiatedType) {
-        return {
-            kind: "InstantiatedGeneric",
-            ...type,
-        };
-    }
-
     if (type.conditionalCheckType) {
         return {
-            kind: "ConditionalType",
+            kind: makeAliasedKindIfNamed(type, "ConditionalType"),
             ...type,
             conditionalTrueType: type.conditionalTrueType < 0 ? undefined : type.conditionalTrueType,
             conditionalFalseType: type.conditionalFalseType < 0 ? undefined : type.conditionalFalseType,
@@ -258,7 +249,7 @@ function processTypeHelper(type: any): any {
 
     if (type.substitutionBaseType) {
         return {
-            kind: "SubstitutionType",
+            kind: makeAliasedKindIfNamed(type, "SubstitutionType"),
             originalType: type.substitutionBaseType,
             ...type,
             substitutionBaseType: undefined,
@@ -267,7 +258,7 @@ function processTypeHelper(type: any): any {
 
     if (type.reverseMappedSourceType) {
         return {
-            kind: "ReverseMappedType",
+            kind: makeAliasedKindIfNamed(type, "ReverseMappedType"),
             sourceType: type.reverseMappedSourceType,
             mappedType: type.reverseMappedMappedType,
             constraintType: type.reverseMappedConstraintType,
@@ -275,6 +266,25 @@ function processTypeHelper(type: any): any {
             reverseMappedSourceType: undefined,
             reverseMappedMappedType: undefined,
             reverseMappedConstraintType: undefined,
+        };
+    }
+
+    if (type.aliasTypeArguments) {
+        return {
+            kind: "GenericTypeAlias",
+            ...type,
+            instantiatedType: undefined,
+            aliasedType: type.instantiatedType,
+            aliasedTypeTypeArguments: type.typeArguments,
+        };
+    }
+
+    if (type.instantiatedType && type.typeArguments?.length) {
+        const instantiatedIsSelf = type.instantiatedType === type.id;
+        return {
+            kind: instantiatedIsSelf ? "GenericType" : "GenericInstantiation",
+            ...type,
+            instantiatedType: instantiatedIsSelf ? undefined : type.instantiatedType,
         };
     }
 
@@ -365,6 +375,10 @@ function processTypeHelper(type: any): any {
         ...type,
         display
     };
+
+    function makeAliasedKindIfNamed(type: { name?: string }, kind: string) {
+        return type.name ? "Aliased" + kind : kind;
+    }
 }
 
 async function run() {
