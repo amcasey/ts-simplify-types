@@ -333,32 +333,32 @@ function processTypeHelper(type: any): any {
         };
     }
 
-    if (type.name === "__type") {
+    if (type.name?.startsWith("__@")) {
+        const match = /^__@([^@]+)@\d+$/.exec(type.name);
         return {
-            kind: "AnonymousType",
+            kind: "KnownSymbol",
             ...type,
-            display: type.location ? undefined : display,
-            name: undefined,
+            name: match ? match[1] : type.name,
         };
     }
 
-    if (type.name === "__object") {
-        return {
-            kind: "AnonymousObject",
-            ...type,
-            display: type.location ? undefined : display,
-            name: undefined,
-        };
+    if (type.name === "__function" ||
+        type.name === "__type" ||
+        type.name === "__class" ||
+        type.name === "__object") {
+        return makeAnonymous(type);
+    }
+
+    if (type.name === "__jsxAttributes") {
+        return makeAnonymous(type, "JsxAttributesType");
     }
 
     // This is less specific than the name checks
-    if (flags.includes("Object")) {
-        if (type.name) {
-            return {
-                kind: "Object",
-                ...type,
-            };
-        }
+    if (flags.includes("Object") && type.name) {
+        return {
+            kind: "Object",
+            ...type,
+        };
     }
 
     // This goes at the end because it's a guess and depends on other interpretations having been checked previously
@@ -376,9 +376,22 @@ function processTypeHelper(type: any): any {
         display
     };
 
+    function makeAnonymous(type: any, kind?: string): any {
+        return {
+            kind: kind ?? "Anonymous" + firstToUpper(type.name.replace(/^__/, "")),
+            ...type,
+            display: type.location ? undefined : display,
+            name: undefined,
+        };
+    }
+
     function makeAliasedKindIfNamed(type: { name?: string }, kind: string) {
         return type.name ? "Aliased" + kind : kind;
     }
+}
+
+function firstToUpper(name: string) {
+    return name[0].toUpperCase() + name.substring(1);
 }
 
 async function run() {
