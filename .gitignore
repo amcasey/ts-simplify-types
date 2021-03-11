@@ -1,4 +1,4 @@
-index.js
+*.js
 *.map
 node_modules
 *.tsbuildinfo
