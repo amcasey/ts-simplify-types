@@ -1,5 +1,5 @@
 function simplifyType(type: object): object {
-    const processed = simplifyTypeHelper(type);
+    const processed = simplifyTypeHelper({...type});
 
     // Normalize the property order
 
