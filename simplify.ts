@@ -215,6 +215,12 @@ function simplifyTypeHelper(type: any): any {
 
     // This is less specific than the name checks
     if (flags.includes("Object") && type.name) {
+        // Unclear why this happens - known instances are non-generic classes or interfaces
+        if (type.instantiatedType === type.id && type.typeArguments?.length === 0) {
+            type.instantiatedType = undefined;
+            type.typeArguments = undefined;
+        }
+
         return {
             kind: "Object",
             ...type,

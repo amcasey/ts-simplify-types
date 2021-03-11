@@ -1,6 +1,6 @@
 {
   "name": "ts-simplify-types",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Simplify type dumps produced by tsc --generateTrace",
   "main": "index.js",
   "bin": {
