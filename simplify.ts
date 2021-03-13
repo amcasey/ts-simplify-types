@@ -298,7 +298,7 @@ function expandTypeFlags41(flags41: number): string[] {
 
 function getTypeFlags({ flags }: { flags: readonly string[] }): readonly string[] {
     // Traces from TS 4.1 contained numeric flags, rather than their string equivalents
-    return flags.length === 1 && typeof /^\d+$/.test(flags[0])
+    return flags.length === 1 && /^\d+$/.test(flags[0])
         ? expandTypeFlags41(+flags[0])
         : flags;
 }
